@@ -1,2 +1,3 @@
 # Expense_Tracker_RN
-In this project, I'm going to build an Expense Tracker app.this will will have features like authentication, realtime data updates, profile, wallet management, transactions, statistics, search and many more features. 
+In this project, an Expense Tracker app has been developed.
+This app has features like authentication, real-time data updates, profile, wallet management, transaction tracking, statistics, search and many more.
