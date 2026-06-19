@@ -1,18 +1,8 @@
-import { useRouter } from "expo-router";
-import { useEffect } from "react";
 import { Image, StyleSheet, View } from "react-native";
 import { IMG_SPLASH_IMAGE } from "../src/assets/images";
 import { COLORS } from "../src/constants/theme";
 
 const index = () => {
-  const router = useRouter();
-
-  useEffect(() => {
-    setTimeout(() => {
-      router.push("/welcome");
-    }, 2000);
-  }, []);
-
   return (
     <View style={styles.container}>
       <Image
