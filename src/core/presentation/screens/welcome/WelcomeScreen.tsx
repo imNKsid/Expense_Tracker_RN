@@ -1,3 +1,4 @@
+import { useRouter } from "expo-router";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import { IMG_WELCOME_IMAGE } from "../../../../assets/images";
@@ -6,12 +7,17 @@ import { verticalScale } from "../../../../utils/styling";
 import { CustomButton, ScreenWrapper, Typography } from "../../components";
 
 const WelcomeScreen = () => {
+  const router = useRouter();
+
   return (
     <ScreenWrapper>
       {/* Login button & Welcome Image */}
       <View style={styles.container}>
         <View>
-          <TouchableOpacity style={styles.loginButton}>
+          <TouchableOpacity
+            style={styles.loginButton}
+            onPress={() => router.push("/(auth)/login")}
+          >
             <Typography fontWeight={"500"}>Sign In</Typography>
           </TouchableOpacity>
           <Animated.Image
@@ -59,7 +65,7 @@ const WelcomeScreen = () => {
               .damping(12)}
             style={styles.buttonContainer}
           >
-            <CustomButton>
+            <CustomButton onPress={() => router.push("/(auth)/register")}>
               <Typography
                 size={20}
                 color={COLORS.neutral900}
