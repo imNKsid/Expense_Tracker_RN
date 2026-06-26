@@ -25,6 +25,10 @@ export const isIOS = () => {
 const statusBarHeight: number = StatusBar.currentHeight ?? 0;
 
 export const getTopMargin = (): number => {
-  // return isIOS() ? 4 : statusBarHeight > 0 ? statusBarHeight : 40;
-  return isIOS() ? WindowHeight * 0.06 : 50;
+  return isIOS()
+    ? WindowHeight * 0.06
+    : statusBarHeight > 0
+      ? statusBarHeight
+      : 40;
+  // return isIOS() ? WindowHeight * 0.06 : 50;
 };
