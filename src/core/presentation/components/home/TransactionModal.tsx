@@ -77,8 +77,6 @@ const TransactionModal = () => {
 
   useEffect(() => {
     if (oldTransaction?.id) {
-      console.log("oldTransaction =>", oldTransaction);
-
       setTransaction({
         type: oldTransaction.type,
         amount: Number(oldTransaction.amount),
