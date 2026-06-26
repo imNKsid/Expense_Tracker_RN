@@ -6,7 +6,10 @@ import { getTopMargin } from "../../../utils/safe-data-utils";
 const ScreenWrapper = ({ style, children }: ScreenWrapperProps) => {
   return (
     <View style={[styles.container, style]}>
-      <StatusBar barStyle={"light-content"} />
+      <StatusBar
+        barStyle={"light-content"}
+        backgroundColor={COLORS.neutral900}
+      />
       {children}
     </View>
   );
