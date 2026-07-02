@@ -12,6 +12,7 @@ import HomeCard from "./home/HomeCard";
 import TransactionList from "./home/TransactionList";
 import TransactionModal from "./home/TransactionModal";
 import ProfileModal from "./profile/ProfileModal";
+import SearchModal from "./search/SearchModal";
 import WalletListItem from "./wallet/WalletListItem";
 import WalletModal from "./wallet/WalletModal";
 
@@ -27,6 +28,7 @@ export {
   ModalWrapper,
   ProfileModal,
   ScreenWrapper,
+  SearchModal,
   TransactionList,
   TransactionModal,
   Typography,
