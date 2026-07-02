@@ -21,7 +21,7 @@ import Typography from "../Typography";
 const WalletModal = () => {
   const router = useRouter();
 
-  const { user, updateUserData } = useAuth();
+  const { user } = useAuth();
 
   const [wallet, setWallet] = useState<WalletType>({
     name: "",

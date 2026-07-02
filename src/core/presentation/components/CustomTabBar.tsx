@@ -1,5 +1,4 @@
 import { COLORS, spacingY } from "@/src/constants/theme";
-import { isIOS } from "@/src/utils/safe-data-utils";
 import { verticalScale } from "@/src/utils/styling";
 import { Tabs } from "expo-router";
 import * as Icons from "phosphor-react-native";
@@ -99,7 +98,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     width: "100%",
-    height: isIOS() ? verticalScale(73) : verticalScale(55),
+    height: verticalScale(73),
     backgroundColor: COLORS.neutral800,
     justifyContent: "space-around",
     alignItems: "center",
@@ -107,7 +106,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
   },
   tabBarItem: {
-    marginBottom: isIOS() ? spacingY._10 : spacingY._5,
+    marginBottom: spacingY._10,
     justifyContent: "center",
     alignItems: "center",
   },

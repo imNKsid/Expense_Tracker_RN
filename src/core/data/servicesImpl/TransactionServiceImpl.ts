@@ -1,12 +1,24 @@
 import { firestore } from "@/src/config/firebase";
+import { COLORS } from "@/src/constants/theme";
+import {
+  getLast12Months,
+  getLast7Days,
+  getYearsRange,
+} from "@/src/utils/date-time-utils";
+import { scale } from "@/src/utils/styling";
 import { ResponseType, TransactionType, WalletType } from "@/types";
 import {
   collection,
   deleteDoc,
   doc,
   getDoc,
+  getDocs,
+  orderBy,
+  query,
   setDoc,
+  Timestamp,
   updateDoc,
+  where,
 } from "firebase/firestore";
 import { uploadFileToCloudinary } from "./UserServiceImpl";
 import { createOrUpdateWalletData } from "./WalletServiceImpl";
@@ -233,7 +245,7 @@ const updateWalletForNewTransaction = async (
 export const deleteTransactionData = async (
   transactionId: string,
   walletId: string,
-) => {
+): Promise<ResponseType> => {
   try {
     const transactionRef = doc(firestore, "transactions", transactionId);
     const transactionSnapshot = await getDoc(transactionRef);
@@ -263,8 +275,8 @@ export const deleteTransactionData = async (
 
     const newIncomeExpenseAmount = walletData[updateType]! - transactionAmount;
 
-    // If the transactionType was expense and the wallet amount goes below zero
-    if (transactionType === "expense" && newWalletAmount < 0) {
+    // If the transactionType was income and the wallet amount goes below zero
+    if (transactionType === "income" && newWalletAmount < 0) {
       return {
         success: false,
         msg: "You cannot delete this transaction!",
@@ -280,6 +292,241 @@ export const deleteTransactionData = async (
     await deleteDoc(transactionRef);
 
     return { success: true };
+  } catch (error: any) {
+    console.log("Error deleting transaction =>", error);
+    return { success: false, msg: error?.message };
+  }
+};
+
+export const fetchWeeklyStatsData = async (
+  uid: string,
+): Promise<ResponseType> => {
+  try {
+    const db = firestore;
+
+    // Taking two dates, today & 7 days ago's date
+    const today = new Date();
+
+    const sevenDaysAgo = new Date(today);
+    sevenDaysAgo.setDate(today.getDate() - 7);
+
+    // Query to fetch all transactions for the last 7 days
+    const transactionQuery = query(
+      collection(db, "transactions"),
+      where("date", ">=", Timestamp.fromDate(sevenDaysAgo)),
+      where("date", "<=", Timestamp.fromDate(today)),
+      orderBy("date", "desc"),
+      where("uid", "==", uid),
+    );
+
+    // Executing query
+    const querySnapshot = await getDocs(transactionQuery);
+
+    // Taking a blank 7 days data having income & expense set to 0 with day & date set
+    const weeklyData = getLast7Days();
+
+    const transactionList: TransactionType[] = [];
+
+    // Processing each transaction to calculate income & expense for each month
+    querySnapshot.forEach((doc) => {
+      const transaction = doc.data() as TransactionType;
+      transaction.id = doc.id;
+      transactionList.push(transaction);
+
+      const transactionDate = (transaction.date as Timestamp)
+        .toDate()
+        .toISOString()
+        .split("T")[0]; // as specific date DD-MM-YYYY
+
+      const dayData = weeklyData.find((day) => day.date === transactionDate);
+
+      // For every day's data, adding the income or expense amount
+      if (dayData) {
+        if (transaction.type === "income") {
+          dayData.income += transaction.amount;
+        } else if (transaction.type === "expense") {
+          dayData.expense += transaction.amount;
+        }
+      }
+    });
+
+    // Creating an stats array by taking each day from weeklyData
+    // and creating two entries in an array - one for income & another for expense
+    const stats = weeklyData.flatMap((dayItem) => [
+      {
+        value: dayItem.income,
+        // label: dayItem.date.split("-").reverse().join("-"),
+        label: dayItem.day,
+        spacing: scale(4),
+        labelWidth: scale(30),
+        frontColor: COLORS.primary, // Income bar color
+      },
+      {
+        value: dayItem.expense,
+        frontColor: COLORS.rose, // Expense bar color
+      },
+    ]);
+
+    return { success: true, data: { stats, transactionList } };
+  } catch (error: any) {
+    console.log("Error deleting transaction =>", error);
+    return { success: false, msg: error?.message };
+  }
+};
+
+export const fetchMonthlyStatsData = async (
+  uid: string,
+): Promise<ResponseType> => {
+  try {
+    const db = firestore;
+
+    // Taking two dates, today & 7 days ago's date
+    const today = new Date();
+
+    const twelveMonthsAgo = new Date(today);
+    twelveMonthsAgo.setDate(today.getMonth() - 12);
+
+    // Query to fetch all transactions for the last 12 months
+    const transactionQuery = query(
+      collection(db, "transactions"),
+      where("date", ">=", Timestamp.fromDate(twelveMonthsAgo)),
+      where("date", "<=", Timestamp.fromDate(today)),
+      orderBy("date", "desc"),
+      where("uid", "==", uid),
+    );
+
+    // Executing query
+    const querySnapshot = await getDocs(transactionQuery);
+
+    // Taking a blank 12 months data having income & expense set to 0 with day & date set
+    const monthlyData = getLast12Months();
+
+    const transactionList: TransactionType[] = [];
+
+    // Mapping each transaction in a day
+    querySnapshot.forEach((doc) => {
+      const transaction = doc.data() as TransactionType;
+      transaction.id = doc.id;
+      transactionList.push(transaction);
+
+      const transactionDate = (transaction.date as Timestamp).toDate();
+
+      const monthName = transactionDate.toLocaleString("default", {
+        month: "short",
+      });
+
+      const shortYear = transactionDate.getFullYear().toString().slice(-2);
+
+      const monthData = monthlyData.find(
+        (monthItem) => monthItem.month === `${monthName} ${shortYear}`,
+      );
+
+      // For every day's data, adding the income or expense amount
+      if (monthData) {
+        if (transaction.type === "income") {
+          monthData.income += transaction.amount;
+        } else if (transaction.type === "expense") {
+          monthData.expense += transaction.amount;
+        }
+      }
+    });
+
+    // Creating an stats array by taking each day from weeklyData
+    // and creating two entries in an array - one for income & another for expense
+    const stats = monthlyData.flatMap((monthItem) => [
+      {
+        value: monthItem.income,
+        label: monthItem.month,
+        spacing: scale(4),
+        labelWidth: scale(46),
+        frontColor: COLORS.primary, // Income bar color
+      },
+      {
+        value: monthItem.expense,
+        frontColor: COLORS.rose, // Expense bar color
+      },
+    ]);
+
+    return { success: true, data: { stats, transactionList } };
+  } catch (error: any) {
+    console.log("Error deleting transaction =>", error);
+    return { success: false, msg: error?.message };
+  }
+};
+
+export const fetchYearlyStatsData = async (
+  uid: string,
+): Promise<ResponseType> => {
+  try {
+    const db = firestore;
+
+    // Query to fetch all transactions for the last 12 months
+    const transactionQuery = query(
+      collection(db, "transactions"),
+      orderBy("date", "desc"),
+      where("uid", "==", uid),
+    );
+
+    // Executing query
+    const querySnapshot = await getDocs(transactionQuery);
+
+    const transactionList: TransactionType[] = [];
+
+    // Fetching the 1st transaction date
+    const firstTransaction = querySnapshot.docs.reduce((earliest, doc) => {
+      const transactionDate = doc.data().date.toDate();
+      return transactionDate < earliest ? transactionDate : earliest;
+    }, new Date());
+
+    // Now using the 1st transaction date, obtaining the year of the 1st transaction
+    const firstYear = firstTransaction.getFullYear();
+    // Taking current year
+    const currentYear = new Date().getFullYear();
+
+    // Now taking a blank yearly data having income & expense set to 0
+    const yearlyData = getYearsRange(firstYear, currentYear);
+
+    // Processing each transaction to calculate income & expense for each year
+    querySnapshot.forEach((doc) => {
+      const transaction = doc.data() as TransactionType;
+      transaction.id = doc.id;
+      transactionList.push(transaction);
+
+      const transactionYear = (transaction.date as Timestamp)
+        .toDate()
+        .getFullYear();
+
+      const yearData = yearlyData.find(
+        (yearItem) => yearItem.year === `${transactionYear}`,
+      );
+
+      // For every year's data, adding the income or expense amount
+      if (yearData) {
+        if (transaction.type === "income") {
+          yearData.income += transaction.amount;
+        } else if (transaction.type === "expense") {
+          yearData.expense += transaction.amount;
+        }
+      }
+    });
+
+    // Creating an stats array by taking each day from weeklyData
+    // and creating two entries in an array - one for income & another for expense
+    const stats = yearlyData.flatMap((yearItem) => [
+      {
+        value: yearItem.income,
+        label: yearItem.year,
+        spacing: scale(4),
+        labelWidth: scale(35),
+        frontColor: COLORS.primary, // Income bar color
+      },
+      {
+        value: yearItem.expense,
+        frontColor: COLORS.rose, // Expense bar color
+      },
+    ]);
+
+    return { success: true, data: { stats, transactionList } };
   } catch (error: any) {
     console.log("Error deleting transaction =>", error);
     return { success: false, msg: error?.message };
