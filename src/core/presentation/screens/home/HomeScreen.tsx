@@ -44,7 +44,10 @@ const HomeScreen = () => {
               {user?.name}
             </Typography>
           </View>
-          <TouchableOpacity style={styles.searchIcon}>
+          <TouchableOpacity
+            style={styles.searchIcon}
+            onPress={() => router.push("/(modals)/searchModal")}
+          >
             <Icons.MagnifyingGlassIcon
               size={verticalScale(22)}
               color={COLORS.neutral200}
