@@ -23,20 +23,20 @@ const ProfileScreen = () => {
       routeName: "/(modals)/profileModal",
       bgColor: "#6366F1",
     },
-    {
-      title: "Settings",
-      icon: (
-        <Icons.GearSixIcon size={26} color={COLORS.white} weight={"fill"} />
-      ),
-      //   routeName: "/(modals)/profileModal",
-      bgColor: "#059669",
-    },
-    {
-      title: "Privacy Policy",
-      icon: <Icons.LockIcon size={26} color={COLORS.white} weight={"fill"} />,
-      //   routeName: "/(modals)/profileModal",
-      bgColor: COLORS.neutral600,
-    },
+    // {
+    //   title: "Settings",
+    //   icon: (
+    //     <Icons.GearSixIcon size={26} color={COLORS.white} weight={"fill"} />
+    //   ),
+    //   //   routeName: "/(modals)/profileModal",
+    //   bgColor: "#059669",
+    // },
+    // {
+    //   title: "Privacy Policy",
+    //   icon: <Icons.LockIcon size={26} color={COLORS.white} weight={"fill"} />,
+    //   //   routeName: "/(modals)/profileModal",
+    //   bgColor: COLORS.neutral600,
+    // },
     {
       title: "Logout",
       icon: <Icons.PowerIcon size={26} color={COLORS.white} weight={"fill"} />,
