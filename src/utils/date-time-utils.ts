@@ -7,7 +7,7 @@ export const getLast7Days = () => {
     date.setDate(date.getDate() - i);
     result.push({
       day: daysOfWeek[date.getDay()],
-      date: date.toISOString().split("T")[0],
+      date: date.toISOString().split("T")[0], // DD-MM-YYYY
       income: 0,
       expense: 0,
     });
@@ -40,7 +40,7 @@ export const getLast12Months = () => {
     const monthName = monthsOfYear[date.getMonth()];
     const shortYear = date.getFullYear().toString().slice(-2);
     const formattedMonthYear = `${monthName} ${shortYear}`; // Jan 24, Feb 25
-    const formattedDate = date.toISOString().split("T")[0];
+    const formattedDate = date.toISOString().split("T")[0]; // DD-MM-YYYY
 
     result.push({
       month: formattedMonthYear,
@@ -54,7 +54,7 @@ export const getLast12Months = () => {
   return result.reverse();
 };
 
-export const getYearsRange = (startYear: number, endYear: number): any => {
+export const getYearsRange = (startYear: number, endYear: number) => {
   const result = [];
   for (let year = startYear; year <= endYear; year++) {
     result.push({
